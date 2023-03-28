@@ -1,13 +1,13 @@
 import Globals from './globals/globals.js'
-import FilterSelector from './templates/FilterSelector.js'
+import Templates from './templates/TemplatesModule.js'
 
-const ingredientsFilterSelector = new FilterSelector('ingredients', 'Ingredients')
-const appliancesFilterSelector = new FilterSelector('appliances', 'Appareils')
-const toolsFilterSelector = new FilterSelector('tools', 'Ustensiles')
+const ingredientsFilterSelector = new Templates.FilterSelector('ingredients', 'Ingredients')
+const appliancesFilterSelector = new Templates.FilterSelector('appliances', 'Appareils')
+const toolsFilterSelector = new Templates.FilterSelector('tools', 'Ustensiles')
 
-ingredientsFilterSelector.addTo(Globals.DOM.selectorsArea)
-appliancesFilterSelector.addTo(Globals.DOM.selectorsArea)
-toolsFilterSelector.addTo(Globals.DOM.selectorsArea)
+ingredientsFilterSelector.addTo(Globals.DOM.selectorsContainer)
+appliancesFilterSelector.addTo(Globals.DOM.selectorsContainer)
+toolsFilterSelector.addTo(Globals.DOM.selectorsContainer)
 
 ingredientsFilterSelector.listItems = [
   'coco',
@@ -35,3 +35,9 @@ ingredientsFilterSelector.items.add('oeuf')
 ingredientsFilterSelector.items.add('champignons')
 
 console.log(ingredientsFilterSelector.listItems)
+
+const tagsHandler = new Templates.TagsHandler(Globals.DOM.tagsContainer)
+tagsHandler.addTag('Coco', '#3282f7')
+tagsHandler.addTag('Banane', '#3282f7')
+tagsHandler.addTag('Pain', '#3282f7')
+tagsHandler.addTag('Farine', '#3282f7')

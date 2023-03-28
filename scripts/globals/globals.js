@@ -1,6 +1,7 @@
 const DOM = {
   main: document.querySelector('main'),
-  selectorsArea: document.querySelector('.selectorsArea')
+  tagsContainer: document.querySelector('.tagsContainer'),
+  selectorsContainer: document.querySelector('.selectorsContainer')
 }
 
 const Globals = {

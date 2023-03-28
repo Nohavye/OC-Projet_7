@@ -45,7 +45,13 @@ h1 {
   line-height: 22px;
 }
 
-.selectorsArea{
+.tagsContainer {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.selectorsContainer {
   margin-top: 20px;
   display: flex;
   align-items: start;
