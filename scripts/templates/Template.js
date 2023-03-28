@@ -33,7 +33,6 @@ class TemplatePropertiesHandler {
       this._ElementHandlerFunctions.deleteKey(keyProperty, value)
       return true
     }
-
   })
 
   get properties () {
@@ -119,8 +118,9 @@ class Template {
   #_stylesHandler = new StylesHandler()
   #_eventsHandler = new EventsHandler()
   #_HTMLContentsHandler = new HTMLContentsHandler()
+  #_keysChildrenList = []
 
-  constructor (tag, children, attributes, styles, events, HTMLContents) {
+  constructor (tag, properties, children) {
     this.#_element = document.createElement(tag)
 
     if (typeof (children) === 'object') {
@@ -128,6 +128,7 @@ class Template {
         if (children[key] instanceof Template) {
           this[key] = children[key]
           this.#_element.appendChild(this[key].element)
+          this.#_keysChildrenList.push(key)
         }
       }
     }
@@ -136,10 +137,40 @@ class Template {
     this.#_eventsHandler.setElement(this.#_element)
     this.#_HTMLContentsHandler.setElement(this.#_element)
 
-    if (typeof (attributes) === 'object') this.attributes = attributes
-    if (typeof (styles) === 'object') this.styles = styles
-    if (typeof (events) === 'object') this.events = events
-    if (typeof (HTMLContents) === 'object') this.HTMLContents = HTMLContents
+    if (typeof (properties) === 'object') {
+      if ('attributes' in properties) this.attributes = properties.attributes
+      if ('styles' in properties) this.styles = properties.styles
+      if ('events' in properties) this.events = properties.events
+      if ('HTMLContents' in properties) this.HTMLContents = properties.HTMLContents
+    }
+  }
+
+  children = {
+    keysList: this.#_keysChildrenList,
+
+    add: (key, child) => {
+      if (child instanceof Template) {
+        this[key] = child
+        this.#_element.appendChild(this[key].element)
+        this.#_keysChildrenList.push(key)
+      }
+    },
+    remove: (key) => {
+      if (this[key] instanceof Template) {
+        this.#_element.removeChild(this[key].element)
+        delete this[key]
+        this.#_keysChildrenList.splice(this.#_keysChildrenList.indexOf(key), 1)
+      }
+    },
+    clear: () => {
+      if (this.#_keysChildrenList.length !== 0) {
+        this.#_keysChildrenList.forEach((key) => {
+          this.#_element.removeChild(this[key].element)
+          delete this[key]
+        })
+        this.#_keysChildrenList = []
+      }
+    }
   }
 
   get attributes () {

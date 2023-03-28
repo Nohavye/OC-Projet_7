@@ -4,7 +4,7 @@
 
 body {
   padding: 40px 100px;
-  font-family: 'DM sans';
+  font-family: 'Lato';
   font-style: normal;
 }
 
@@ -15,6 +15,7 @@ header {
 }
 
 h1 {
+  font-family: 'DM sans';
   font-weight: 700;
   font-size: 36px;
   line-height: 47px;
@@ -44,6 +45,33 @@ h1 {
   line-height: 22px;
 }
 
-.test-filter-selector {
+.selectorsArea{
   margin-top: 20px;
+  display: flex;
+  align-items: start;
+  gap: 20px;
+}
+
+.filterSelector_searchInput {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.filterSelector_list {
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.ingredientsFilterSelector {
+  background-color: #3282f7;
+}
+
+.appliancesFilterSelector {
+  background-color: #68D9A4;
+}
+
+.toolsFilterSelector {
+  background-color: #ED6454;
 }
