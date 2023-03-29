@@ -1,10 +1,19 @@
 import Data from './data/DataModule.js'
 import Globals from './globals/globals.js'
 import Templates from './templates/TemplatesModule.js'
+import InvertedIndex from './research/InvertedIndex.js'
 
 await Data.Manager.loadData('data/recipes.json')
 const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
 const recipes = Data.Manager.hash(recipesEntities, 'id')
+InvertedIndex.createMaps(recipes)
+
+console.log('---------------------------------------------------------------------')
+console.log('---------------------------------------------------------------------')
+console.log('---------------------------------------------------------------------')
+InvertedIndex.ustensilsMap.forEach((value, key, map) => {
+  console.log(`${key}: ${value}`)
+})
 
 const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
 const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
