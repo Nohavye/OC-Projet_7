@@ -1,15 +1,19 @@
 import Globals from './globals/globals.js'
 import Templates from './templates/TemplatesModule.js'
 
-const ingredientsFilterSelector = new Templates.FilterSelector('ingredients', 'Ingredients')
-const appliancesFilterSelector = new Templates.FilterSelector('appliances', 'Appareils')
-const toolsFilterSelector = new Templates.FilterSelector('tools', 'Ustensiles')
+const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
+const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
+const ustensilsFilter = new Templates.FilterSelector('ustensils', 'Ustensiles')
 
-ingredientsFilterSelector.addTo(Globals.DOM.selectorsContainer)
-appliancesFilterSelector.addTo(Globals.DOM.selectorsContainer)
-toolsFilterSelector.addTo(Globals.DOM.selectorsContainer)
+ingredientsFilter.backgroundColor = '#3282F7'
+appliancesFilter.backgroundColor = '#68D9A4'
+ustensilsFilter.backgroundColor = '#ED6454'
 
-ingredientsFilterSelector.listItems = [
+ingredientsFilter.addTo(Globals.DOM.selectorsContainer)
+appliancesFilter.addTo(Globals.DOM.selectorsContainer)
+ustensilsFilter.addTo(Globals.DOM.selectorsContainer)
+
+ingredientsFilter.itemsList = [
   'coco',
   'lait',
   'oeuf',
@@ -28,16 +32,32 @@ ingredientsFilterSelector.listItems = [
   'eau'
 ]
 
-console.log(ingredientsFilterSelector.listItems)
+appliancesFilter.itemsList = [
+  'batteur',
+  'four',
+  'micro-onde',
+  'mixeur',
+  'grille pain'
+]
 
-ingredientsFilterSelector.items.remove('oeuf')
-ingredientsFilterSelector.items.add('oeuf')
-ingredientsFilterSelector.items.add('champignons')
+ustensilsFilter.itemsList = [
+  'fouet',
+  'cuillere',
+  'couteau',
+  'écumoir'
+]
 
-console.log(ingredientsFilterSelector.listItems)
+ingredientsFilter.items.remove('oeuf')
+ingredientsFilter.items.add('oeuf')
+ingredientsFilter.items.add('champignons')
 
 const tagsHandler = new Templates.TagsHandler(Globals.DOM.tagsContainer)
-tagsHandler.addTag('Coco', '#3282f7')
-tagsHandler.addTag('Banane', '#3282f7')
-tagsHandler.addTag('Pain', '#3282f7')
-tagsHandler.addTag('Farine', '#3282f7')
+
+document.addEventListener('selectItemFilter', (e) => {
+  tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
+  e.detail.emitter.items.exclude(e.detail.value)
+})
+
+document.addEventListener('removeTag', (e) => {
+  e.detail.emitter.items.include(e.detail.value)
+})

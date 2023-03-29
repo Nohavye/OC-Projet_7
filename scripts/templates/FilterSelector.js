@@ -1,10 +1,10 @@
 import Template from './Template.js'
 
 class FilterSelector {
-  #_listItems = []
   #_matchExpression = /^/
-  #_listMatchingItems = []
   #_isExpanded = false
+  #_items = new Map()
+  #_excludedItems = []
 
   constructor (name, placeholder) {
     this._template = new Template('div', {
@@ -14,6 +14,7 @@ class FilterSelector {
       },
 
       styles: {
+        backgroundColor: '#777777',
         boxSizing: 'border-box',
         padding: '20px',
         width: 'max-content',
@@ -50,13 +51,13 @@ class FilterSelector {
           events: {
             input: (e) => {
               this.#setMatchExpression(e.target.value)
-              this.#updateItemsTemplates()
+              this.#updateDisplayedItems()
             },
             focus: () => {
-              this.#addInputClickEvent()
+              this.#inputClickEvent.add()
             },
             blur: () => {
-              this.#removeInputClickEvent()
+              this.#inputClickEvent.remove()
             }
           }
         }),
@@ -99,16 +100,17 @@ class FilterSelector {
     })
   }
 
-  #addInputClickEvent () {
-    setTimeout(() => {
-      this._template.header.input.events.key.click = () => {
-        this.#toggle()
-      }
-    }, 250)
-  }
-
-  #removeInputClickEvent () {
-    this._template.header.input.events.remove('click')
+  #inputClickEvent = {
+    add: () => {
+      setTimeout(() => {
+        this._template.header.input.events.key.click = () => {
+          this.#toggle()
+        }
+      }, 250)
+    },
+    remove: () => {
+      this._template.header.input.events.remove('click')
+    }
   }
 
   #toggle () {
@@ -127,46 +129,90 @@ class FilterSelector {
     this.#_matchExpression = new RegExp(`^${word}`)
   }
 
-  #createItemTemplate (index, item) {
-    const itemTemplate = new Template('li')
-    itemTemplate.HTMLContents.key.text = item
-    this._template.list.children.add(`item_${index}`, itemTemplate)
+  #createItemsMap (listItems) {
+    listItems.forEach((item) => {
+      this.#_items.set(item, this.#createItemTemplate(item))
+    })
   }
 
-  #updateItemsTemplates () {
-    this.#_listMatchingItems = this.#_listItems.filter(
-      item => this.#_matchExpression.test(item)
+  #createItemTemplate (item) {
+    const itemTemplate = new Template('li')
+    itemTemplate.HTMLContents.key.text = item
+    itemTemplate.styles.key.cursor = 'pointer'
+    itemTemplate.events.key.click = () => {
+      document.dispatchEvent(new CustomEvent('selectItemFilter', {
+        detail: {
+          value: item,
+          emitter: this
+        }
+      }))
+    }
+    return itemTemplate
+  }
+
+  #updateDisplayedItems () {
+    const itemKeys = Array.from(this.#_items.keys())
+
+    this.#_excludedItems.forEach((excludedItem) => {
+      itemKeys.splice(itemKeys.indexOf(excludedItem), 1)
+    })
+
+    const matchingItemKeys = itemKeys.filter(
+      key => this.#_matchExpression.test(key)
     )
 
     this._template.list.children.clear()
 
     let i = 0
-    this.#_listMatchingItems.forEach((item) => {
-      this.#createItemTemplate(i, item)
+    matchingItemKeys.sort().forEach((key) => {
+      this._template.list.children.add(`item_${i}`, this.#_items.get(key))
       i += 1
     })
   }
 
   items = {
     add: (item) => {
-      this.#_listItems.push(item)
-      this.#_listItems.sort()
-      this.#updateItemsTemplates()
+      this.#_items.set(item, this.#createItemTemplate(item))
+      this.#updateDisplayedItems()
     },
 
     remove: (item) => {
-      this.#_listItems.splice(this.#_listItems.indexOf(item), 1)
-      this.#updateItemsTemplates()
+      this.#_items.delete(item)
+      this.#updateDisplayedItems()
+    },
+
+    include: (item) => {
+      const index = this.#_excludedItems.indexOf(item)
+      if (index !== -1) {
+        this.#_excludedItems.splice(index, 1)
+        this.#updateDisplayedItems()
+      }
+    },
+
+    exclude: (item) => {
+      const index = this.#_excludedItems.indexOf(item)
+      if (index === -1 && this.#_items.has(item)) {
+        this.#_excludedItems.push(item)
+        this.#updateDisplayedItems()
+      }
     }
   }
 
-  get listItems () {
-    return this.#_listItems
+  get backgroundColor () {
+    return this._template.styles.key.backgroundColor
   }
 
-  set listItems (listItems) {
-    this.#_listItems = listItems.sort()
-    this.#updateItemsTemplates()
+  set backgroundColor (value) {
+    this._template.styles.key.backgroundColor = value
+  }
+
+  get itemsList () {
+    return Array.from(this.#_items.keys())
+  }
+
+  set itemsList (listItems) {
+    this.#createItemsMap(listItems)
+    this.#updateDisplayedItems()
   }
 
   addTo (parent) {

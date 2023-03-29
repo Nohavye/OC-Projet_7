@@ -69,15 +69,3 @@ h1 {
   font-size: 18px;
   line-height: 22px;
 }
-
-.ingredientsFilterSelector {
-  background-color: #3282f7;
-}
-
-.appliancesFilterSelector {
-  background-color: #68D9A4;
-}
-
-.toolsFilterSelector {
-  background-color: #ED6454;
-}
