@@ -20,6 +20,14 @@ class FilterSelector {
         width: 'max-content',
         borderRadius: '5px',
         color: 'white'
+      },
+
+      events: {
+        mouseleave: () => {
+          if (this.#_isExpanded) {
+            this.#toggle()
+          }
+        }
       }
     },
     {

@@ -1,5 +1,10 @@
+import Data from './data/DataModule.js'
 import Globals from './globals/globals.js'
 import Templates from './templates/TemplatesModule.js'
+
+await Data.Manager.loadData('data/recipes.json')
+const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
+const recipes = Data.Manager.hash(recipesEntities, 'id')
 
 const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
 const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
