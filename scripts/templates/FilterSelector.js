@@ -134,7 +134,7 @@ class FilterSelector {
   }
 
   #setMatchExpression (word) {
-    this.#_matchExpression = new RegExp(`^${word}`)
+    this.#_matchExpression = new RegExp(`^${word}`, 'i')
   }
 
   #createItemsMap (listItems) {

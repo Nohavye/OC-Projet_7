@@ -434,7 +434,7 @@
             "time": 40,
             "description": "Éplucher les fruits et les couper en morceaux, les mettre dans une casserole en ajoutant l'eau et le sucre vanillé. Laisser cuire 15 minutes en remuant régulièrement.",
             "appliance": "Casserole",
-            "ustensils": ["couteau", "économe"]
+            "ustensils": ["couteau", "Économe"]
         },
         {
             "id": 13,
@@ -1090,7 +1090,7 @@
             "time": 60,
             "description":"Découper en cubes les carottes et pommes de terre. Faire revenir dans du beurre. Ajouter les lardons, une fois les lardons dorés, ajouter un grand verre d'eau. Ajouter les petit poids et les haricots verts ( tous deux pré cuits ). Ajouter Sel, poivre, thyms et laurier",
             "appliance": "Poêle",
-            "ustensils":["Couteau", "économe"]
+            "ustensils":["Couteau", "Économe"]
         },
         {
             "id": 32,
@@ -1194,7 +1194,7 @@
             "time": 25,
             "description":"Éplucher les patates douces et coupez les en morceaux. Les faire cuire durant 20 minute dans une casserole d'eau bouillante. Passer au mixer en ajoutant la crème et l'huile d'olive à son gout. Salez, poivrez. Pressez l'orange et ajouter le jus à l'ensemble. Servir.",
             "appliance": "Mixer",
-            "ustensils":["couteau", "économe", "cuillère en bois"]
+            "ustensils":["couteau", "Économe", "cuillère en bois"]
         },
         {
             "id": 35,
@@ -1669,7 +1669,7 @@
             "servings": 4,
             "ingredients": [
                 {
-                    "ingredient": "Bananes",
+                    "ingredient": "Banane",
                     "quantity": 2
                 },
                 {

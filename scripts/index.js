@@ -4,10 +4,13 @@ import Templates from './templates/TemplatesModule.js'
 import InvertedIndex from './research/InvertedIndex.js'
 import RecipeCard from './templates/RecipeCard.js'
 
+// Chargement des données.
 await Data.Manager.loadData('data/recipes.json')
 const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
-const recipes = Data.Manager.hash(recipesEntities, 'id')
-InvertedIndex.createMaps(recipes)
+const recipesMap = Data.Manager.hash(recipesEntities, 'id')
+
+// Création de l'indexe inversé.
+InvertedIndex.createMaps(recipesMap)
 
 // console.log('---------------------------------------------------------------------')
 // console.log('---------------------------------------------------------------------')
@@ -16,8 +19,15 @@ InvertedIndex.createMaps(recipes)
 //   console.log(`${key}: ${value}`)
 // })
 
-for (const entity of recipes.values()) {
-  const card = new RecipeCard(entity).addTo(Globals.DOM.main)
+// Création des cartes
+const recipesCardsMap = new Map()
+recipesMap.forEach((recipeEntity, key, map) => {
+  recipesCardsMap.set(key, { recipe: recipeEntity, card: new RecipeCard(recipeEntity) })
+})
+
+// Affichage des cartes
+for (const value of recipesCardsMap.values()) {
+  value.card.addTo(Globals.DOM.main)
 }
 
 const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
@@ -32,43 +42,28 @@ ingredientsFilter.addTo(Globals.DOM.selectorsContainer)
 appliancesFilter.addTo(Globals.DOM.selectorsContainer)
 ustensilsFilter.addTo(Globals.DOM.selectorsContainer)
 
-ingredientsFilter.itemsList = [
-  'coco',
-  'lait',
-  'oeuf',
-  'farine',
-  'patates',
-  'carottes',
-  'bananes',
-  'fraises',
-  'poivrons',
-  'courgettes',
-  'mandarines',
-  'huile',
-  'sucre',
-  'vanille',
-  'pain',
-  'eau'
-]
+// Affichage des ingrédients contenus dans les cartes affichées.
+const ingredients = []
+const appliances = []
+const ustensils = []
 
-appliancesFilter.itemsList = [
-  'batteur',
-  'four',
-  'micro-onde',
-  'mixeur',
-  'grille pain'
-]
+for (const value of recipesCardsMap.values()) {
+  const recipe = value.recipe
 
-ustensilsFilter.itemsList = [
-  'fouet',
-  'cuillere',
-  'couteau',
-  'écumoir'
-]
+  recipe.ingredients.forEach((ingredient) => {
+    ingredients.push(ingredient.name)
+  })
 
-ingredientsFilter.items.remove('oeuf')
-ingredientsFilter.items.add('oeuf')
-ingredientsFilter.items.add('champignons')
+  appliances.push(recipe.appliance)
+
+  recipe.ustensils.forEach((ustensil) => {
+    ustensils.push(ustensil)
+  })
+}
+
+ingredientsFilter.itemsList = ingredients
+appliancesFilter.itemsList = appliances
+ustensilsFilter.itemsList = ustensils
 
 const tagsHandler = new Templates.TagsHandler(Globals.DOM.tagsContainer)
 

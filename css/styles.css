@@ -59,7 +59,13 @@ main {
   gap: 20px;
 }
 
+.selectorContainerPlacement {
+  position: relative;
+  height: 100px;
+}
+
 .selectorsContainer {
+  position: absolute;
   margin-top: 20px;
   display: flex;
   align-items: start;
