@@ -23,6 +23,14 @@ h1 {
   color: #d04f4f;
 }
 
+main {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
 .div_search {
   background-color: #e7e7e7;
   box-sizing: border-box;

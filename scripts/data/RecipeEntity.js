@@ -6,7 +6,8 @@ class IngredientEntity {
   }
 
   get name () { return this._name }
-  get quantity () { return this._quantity }
+  get quantity () { return this._quantity || '' }
+  get unit () { return this._unit || '' }
 }
 
 class RecipeEntity {
