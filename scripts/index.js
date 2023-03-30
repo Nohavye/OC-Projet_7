@@ -4,74 +4,102 @@ import Templates from './templates/TemplatesModule.js'
 import InvertedIndex from './research/InvertedIndex.js'
 import RecipeCard from './templates/RecipeCard.js'
 
-// Chargement des données.
-await Data.Manager.loadData('data/recipes.json')
-const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
-const recipesMap = Data.Manager.hash(recipesEntities, 'id')
-
-// Création de l'indexe inversé.
-InvertedIndex.createMaps(recipesMap)
-
-// console.log('---------------------------------------------------------------------')
-// console.log('---------------------------------------------------------------------')
-// console.log('---------------------------------------------------------------------')
-// InvertedIndex.ustensilsMap.forEach((value, key, map) => {
-//   console.log(`${key}: ${value}`)
-// })
-
-// Création des cartes
-const recipesCardsMap = new Map()
-recipesMap.forEach((recipeEntity, key, map) => {
-  recipesCardsMap.set(key, { recipe: recipeEntity, card: new RecipeCard(recipeEntity) })
-})
-
-// Affichage des cartes
-for (const value of recipesCardsMap.values()) {
-  value.card.addTo(Globals.DOM.main)
+async function getRecipesMap () {
+  // Chargement des données.
+  await Data.Manager.loadData('data/recipes.json')
+  const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
+  const recipesMap = Data.Manager.hash(recipesEntities, 'id')
+  return recipesMap
 }
 
-const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
-const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
-const ustensilsFilter = new Templates.FilterSelector('ustensils', 'Ustensiles')
+function createInvertedIndex (recipesMap) {
+  // Création de l'indexe inversé.
+  InvertedIndex.createMaps(recipesMap)
+}
 
-ingredientsFilter.backgroundColor = '#3282F7'
-appliancesFilter.backgroundColor = '#68D9A4'
-ustensilsFilter.backgroundColor = '#ED6454'
+function createRecipesCardMap (recipesMap) {
+  // Création des cartes
+  const recipesCardsMap = new Map()
+  recipesMap.forEach((recipeEntity, key, map) => {
+    recipesCardsMap.set(key, { recipe: recipeEntity, card: new RecipeCard(recipeEntity) })
+  })
+  return recipesCardsMap
+}
 
-ingredientsFilter.addTo(Globals.DOM.selectorsContainer)
-appliancesFilter.addTo(Globals.DOM.selectorsContainer)
-ustensilsFilter.addTo(Globals.DOM.selectorsContainer)
+function createTagsHandler () {
+  return new Templates.TagsHandler(Globals.DOM.tagsContainer)
+}
 
-// Affichage des ingrédients contenus dans les cartes affichées.
-const ingredients = []
-const appliances = []
-const ustensils = []
+function createFilters () {
+  const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
+  const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
+  const ustensilsFilter = new Templates.FilterSelector('ustensils', 'Ustensiles')
 
-for (const value of recipesCardsMap.values()) {
-  const recipe = value.recipe
+  ingredientsFilter.backgroundColor = '#3282F7'
+  appliancesFilter.backgroundColor = '#68D9A4'
+  ustensilsFilter.backgroundColor = '#ED6454'
 
-  recipe.ingredients.forEach((ingredient) => {
-    ingredients.push(ingredient.name)
+  ingredientsFilter.addTo(Globals.DOM.selectorsContainer)
+  appliancesFilter.addTo(Globals.DOM.selectorsContainer)
+  ustensilsFilter.addTo(Globals.DOM.selectorsContainer)
+
+  return { ingredients: ingredientsFilter, appliances: appliancesFilter, ustensils: ustensilsFilter }
+}
+
+function updateDisplayedCards (recipesCardsMap) {
+  // Affichage des cartes
+  for (const value of recipesCardsMap.values()) {
+    value.card.addTo(Globals.DOM.main)
+  }
+}
+
+function updateFilters (filters, recipesCardsMap) {
+  const ingredients = []
+  const appliances = []
+  const ustensils = []
+
+  for (const value of recipesCardsMap.values()) {
+    const recipe = value.recipe
+
+    recipe.ingredients.forEach((ingredient) => {
+      ingredients.push(ingredient.name)
+    })
+
+    appliances.push(recipe.appliance)
+
+    recipe.ustensils.forEach((ustensil) => {
+      ustensils.push(ustensil)
+    })
+  }
+
+  filters.ingredients.itemsList = ingredients
+  filters.appliances.itemsList = appliances
+  filters.ustensils.itemsList = ustensils
+}
+
+function initEvents(tagsHandler) {
+  document.addEventListener('selectItemFilter', (e) => {
+    tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
+    e.detail.emitter.items.exclude(e.detail.value)
   })
 
-  appliances.push(recipe.appliance)
-
-  recipe.ustensils.forEach((ustensil) => {
-    ustensils.push(ustensil)
+  document.addEventListener('removeTag', (e) => {
+    e.detail.emitter.items.include(e.detail.value)
   })
 }
 
-ingredientsFilter.itemsList = ingredients
-appliancesFilter.itemsList = appliances
-ustensilsFilter.itemsList = ustensils
+async function init () {
+  const recipesMap = await getRecipesMap()
+  createInvertedIndex(recipesMap)
 
-const tagsHandler = new Templates.TagsHandler(Globals.DOM.tagsContainer)
+  const tagsHandler = createTagsHandler()
+  const filters = createFilters()
 
-document.addEventListener('selectItemFilter', (e) => {
-  tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
-  e.detail.emitter.items.exclude(e.detail.value)
-})
+  const recipesCardsMap = createRecipesCardMap(recipesMap)
+  updateDisplayedCards(recipesCardsMap)
+  updateFilters(filters, recipesCardsMap)
 
-document.addEventListener('removeTag', (e) => {
-  e.detail.emitter.items.include(e.detail.value)
-})
+  initEvents(tagsHandler)
+}
+
+init()

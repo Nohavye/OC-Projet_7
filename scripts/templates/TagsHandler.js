@@ -63,19 +63,27 @@ class TagsHandler {
       this.#_tags.set(tagName, { emitter, template })
       this.#_tagsContainer.appendChild(template.element)
     }
+
+    document.dispatchEvent(new CustomEvent('addTag', {
+      detail: {
+        tagsList: this.tagsList,
+        value: tagName
+      }
+    }))
   }
 
   removeTag (tagName) {
+    const emitter = this.#_tags.get(tagName).emitter
     this.#_tagsContainer.removeChild(this.#_tags.get(tagName).template.element)
+    this.#_tags.delete(tagName)
 
     document.dispatchEvent(new CustomEvent('removeTag', {
       detail: {
+        tagsList: this.tagsList,
         value: tagName,
-        emitter: this.#_tags.get(tagName).emitter
+        emitter
       }
     }))
-
-    this.#_tags.delete(tagName)
   }
 
   get tagsList () {
