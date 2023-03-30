@@ -17,13 +17,19 @@ class InvertedIndex {
   static appliancesMap = new Map()
   static ustensilsMap = new Map()
 
-  static createMaps (hashTable) {
+  static updateMaps (hashTable) {
+    this.keyWordsMap.clear()
+    this.ingredientsMap.clear()
+    this.appliancesMap.clear()
+    this.ustensilsMap.clear()
+
     hashTable.forEach((recipe, id, map) => {
       this.#scanKeyWords(recipe, id)
       this.#scanIngredients(recipe, id)
       this.#scanAppliances(recipe, id)
       this.#scanUstensils(recipe, id)
     })
+
     this.#_excludedWords.forEach((excludedWord) => {
       if (this.keyWordsMap.has(excludedWord)) {
         this.keyWordsMap.delete(excludedWord)

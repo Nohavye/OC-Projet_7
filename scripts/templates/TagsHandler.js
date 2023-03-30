@@ -67,7 +67,8 @@ class TagsHandler {
     document.dispatchEvent(new CustomEvent('addTag', {
       detail: {
         tagsList: this.tagsList,
-        value: tagName
+        value: tagName,
+        emitter
       }
     }))
   }

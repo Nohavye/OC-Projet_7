@@ -138,6 +138,7 @@ class FilterSelector {
   }
 
   #createItemsMap (listItems) {
+    this.#_items.clear()
     listItems.forEach((item) => {
       this.#_items.set(item, this.#createItemTemplate(item))
     })
