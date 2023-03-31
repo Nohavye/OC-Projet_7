@@ -4,6 +4,8 @@ import InvertedIndex from './research/InvertedIndex.js'
 import RecipeCard from './templates/RecipeCard.js'
 import Templates from './templates/TemplatesModule.js'
 
+import GetIndexes from './research/GetIndexes.js'
+
 let recipesMap = new Map()
 const cardsMap = new Map()
 
@@ -102,6 +104,8 @@ function updateFilters (filters, keys) {
 }
 
 function initEvents (searchInputHandler, tagsHandler, filters) {
+  GetIndexes.excludedWords = Globals.excludedWords
+  GetIndexes.recipesEntities = Array.from(recipesMap.values())
   let keyWordsExpressions = []
 
   function updateKeyWordsExpressions () {
@@ -116,13 +120,14 @@ function initEvents (searchInputHandler, tagsHandler, filters) {
         let keysKeyWords = []
 
         if (keyWordExpression instanceof RegExp) {
-          InvertedIndex.keyWordsMap.forEach((value, key) => {
-            if (keyWordExpression.test(key)) { keysKeyWords = [...keysKeyWords, ...value] }
-          })
+          keysKeyWords = [
+            ...keysKeyWords,
+            ...GetIndexes.byKeyWord(keyWordExpression, Array.from(recipesMap.values()))
+          ]
         }
-        const keysIngredients = InvertedIndex.ingredientsMap.get(keyWordExpression) || []
-        const keysAppliances = InvertedIndex.appliancesMap.get(keyWordExpression) || []
-        const keysUstensils = InvertedIndex.ustensilsMap.get(keyWordExpression) || []
+        const keysIngredients = GetIndexes.byIngredient(keyWordExpression) || []
+        const keysAppliances = GetIndexes.byAppliance(keyWordExpression) || []
+        const keysUstensils = GetIndexes.byUstensil(keyWordExpression) || []
         const newKeys = [...keysKeyWords, ...keysIngredients, ...keysAppliances, ...keysUstensils]
 
         if (keys.length === 0) {
