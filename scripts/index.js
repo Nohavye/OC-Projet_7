@@ -1,6 +1,5 @@
 import Data from './data/DataModule.js'
 import Globals from './globals/globals.js'
-import InvertedIndex from './research/InvertedIndex.js'
 import RecipeCard from './templates/RecipeCard.js'
 import Templates from './templates/TemplatesModule.js'
 
@@ -14,12 +13,6 @@ async function getRecipesMap () {
   await Data.Manager.loadData('data/recipes.json')
   const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
   recipesMap = Data.Manager.hash(recipesEntities, 'id')
-}
-
-function updateInvertedIndex () {
-  // Création de l'indexe inversé.
-  InvertedIndex.excludedWords = Globals.excludedWords
-  InvertedIndex.updateMaps(recipesMap)
 }
 
 function createCardMap () {
@@ -169,7 +162,6 @@ function initEvents (searchInputHandler, tagsHandler, filters) {
 
 async function init () {
   await getRecipesMap()
-  updateInvertedIndex()
 
   const searchInputHandler = createSearchInputHandler()
   const tagsHandler = createTagsHandler()
