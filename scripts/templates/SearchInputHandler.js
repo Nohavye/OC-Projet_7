@@ -10,6 +10,7 @@ class SearchInputHandler {
     this._input = input
     this._button = button
 
+    this._input.value = ''
     this._input.addEventListener('input', (e) => {
       this.#inputEventHandler(e.target.value)
     })

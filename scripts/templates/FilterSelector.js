@@ -151,6 +151,7 @@ class FilterSelector {
     itemTemplate.styles.key.cursor = 'pointer'
     itemTemplate.events.key.click = () => {
       this.#toggle()
+      this._template.header.input.element.value = ''
       document.dispatchEvent(new CustomEvent('selectItemFilter', {
         detail: {
           value: item,
