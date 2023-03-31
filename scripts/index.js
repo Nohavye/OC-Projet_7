@@ -1,8 +1,8 @@
 import Data from './data/DataModule.js'
 import Globals from './globals/globals.js'
-import Templates from './templates/TemplatesModule.js'
 import InvertedIndex from './research/InvertedIndex.js'
 import RecipeCard from './templates/RecipeCard.js'
+import Templates from './templates/TemplatesModule.js'
 
 let recipesMap = new Map()
 const cardsMap = new Map()
@@ -16,6 +16,7 @@ async function getRecipesMap () {
 
 function updateInvertedIndex () {
   // Création de l'indexe inversé.
+  InvertedIndex.excludedWords = Globals.excludedWords
   InvertedIndex.updateMaps(recipesMap)
 }
 
@@ -24,6 +25,14 @@ function createCardMap () {
   recipesMap.forEach((recipeEntity, key, map) => {
     cardsMap.set(key, new RecipeCard(recipeEntity))
   })
+}
+
+function createSearchInputHandler () {
+  return new Templates.SearchInputHandler(
+    Globals.DOM.searchInput,
+    Globals.DOM.buttonSearch,
+    Globals.excludedWords
+  )
 }
 
 function createTagsHandler () {
@@ -92,19 +101,29 @@ function updateFilters (filters, keys) {
   filters.ustensils.itemsList = ustensils
 }
 
-function initEvents (tagsHandler, filters) {
-  document.addEventListener('selectItemFilter', (e) => {
-    tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
-  })
+function initEvents (searchInputHandler, tagsHandler, filters) {
+  let keyWordsExpressions = []
 
-  function updateWithTags (tagsList) {
-    if (tagsList.length !== 0) {
+  function updateKeyWordsExpressions () {
+    keyWordsExpressions = [...searchInputHandler.matchingExpressions, ...tagsHandler.tagsList]
+  }
+
+  function updateWithExpressions () {
+    if (keyWordsExpressions.length !== 0) {
       let keys = []
-      tagsList.forEach((tag) => {
-        const keysIngredients = InvertedIndex.ingredientsMap.get(tag) || []
-        const keysAppliances = InvertedIndex.appliancesMap.get(tag) || []
-        const keysUstensils = InvertedIndex.ustensilsMap.get(tag) || []
-        const newKeys = [...keysIngredients, ...keysAppliances, ...keysUstensils]
+
+      keyWordsExpressions.forEach((keyWordExpression) => {
+        let keysKeyWords = []
+
+        if (keyWordExpression instanceof RegExp) {
+          InvertedIndex.keyWordsMap.forEach((value, key) => {
+            if (keyWordExpression.test(key)) { keysKeyWords = [...keysKeyWords, ...value] }
+          })
+        }
+        const keysIngredients = InvertedIndex.ingredientsMap.get(keyWordExpression) || []
+        const keysAppliances = InvertedIndex.appliancesMap.get(keyWordExpression) || []
+        const keysUstensils = InvertedIndex.ustensilsMap.get(keyWordExpression) || []
+        const newKeys = [...keysKeyWords, ...keysIngredients, ...keysAppliances, ...keysUstensils]
 
         if (keys.length === 0) {
           keys = newKeys
@@ -121,14 +140,25 @@ function initEvents (tagsHandler, filters) {
     }
   }
 
+  searchInputHandler.inputElement.addEventListener('inputKeyWord', (e) => {
+    updateKeyWordsExpressions()
+    updateWithExpressions()
+  })
+
   document.addEventListener('addTag', (e) => {
     e.detail.emitter.items.exclude(e.detail.value)
-    updateWithTags(e.detail.tagsList)
+    updateKeyWordsExpressions()
+    updateWithExpressions()
   })
 
   document.addEventListener('removeTag', (e) => {
     e.detail.emitter.items.include(e.detail.value)
-    updateWithTags(e.detail.tagsList)
+    updateKeyWordsExpressions()
+    updateWithExpressions()
+  })
+
+  document.addEventListener('selectItemFilter', (e) => {
+    tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
   })
 }
 
@@ -136,6 +166,7 @@ async function init () {
   await getRecipesMap()
   updateInvertedIndex()
 
+  const searchInputHandler = createSearchInputHandler()
   const tagsHandler = createTagsHandler()
   const filters = createFilters()
 
@@ -143,7 +174,7 @@ async function init () {
   updateDisplayedCards()
   updateFilters(filters)
 
-  initEvents(tagsHandler, filters)
+  initEvents(searchInputHandler, tagsHandler, filters)
 }
 
 init()

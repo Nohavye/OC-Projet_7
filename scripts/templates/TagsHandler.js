@@ -64,11 +64,18 @@ class TagsHandler {
       this.#_tagsContainer.appendChild(template.element)
     }
 
+    const matchingExpressions = []
+
+    this.tagsList.forEach((keyWord) => {
+      matchingExpressions.push(new RegExp(`^${keyWord}`, 'i'))
+    })
+
     document.dispatchEvent(new CustomEvent('addTag', {
       detail: {
+        emitter,
+        matchingExpressions,
         tagsList: this.tagsList,
-        value: tagName,
-        emitter
+        value: tagName
       }
     }))
   }
@@ -78,11 +85,18 @@ class TagsHandler {
     this.#_tagsContainer.removeChild(this.#_tags.get(tagName).template.element)
     this.#_tags.delete(tagName)
 
+    const matchingExpressions = []
+
+    this.tagsList.forEach((keyWord) => {
+      matchingExpressions.push(new RegExp(`^${keyWord}`, 'i'))
+    })
+
     document.dispatchEvent(new CustomEvent('removeTag', {
       detail: {
+        emitter,
+        matchingExpressions,
         tagsList: this.tagsList,
-        value: tagName,
-        emitter
+        value: tagName
       }
     }))
   }

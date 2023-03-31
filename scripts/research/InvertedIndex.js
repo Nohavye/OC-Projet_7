@@ -1,16 +1,6 @@
 class InvertedIndex {
   static #_wordBreaker = /[ ,’';:!?.()°%/\\0-9]+/
-  static #_excludedWords = ['le', 'la', 'les', 'une', 'un', 'des', 'du', 'de', 'au', 'aux',
-    'et', 'ou', 'mais', 'que', 'qui', 'quoi', 'où', 'quand', 'comment', 'avec', 'pour', 'si',
-    'par', 'sur', 'dans', 'vers', 'chez', 'jusque', 'jusqu', 'lorsque', 'ainsi', 'toujours',
-    'jamais', 'parfois', 'souvent', 'plusieurs', 'quelque', 'chaque', 'certains', 'quelques',
-    'autres', 'même', 'comme', 'tel', 'tout', 'toute', 'tous', 'toutes', 'cette', 'ce', 'ces',
-    'dont', 'notre', 'nos', 'votre', 'vos', 'leur', 'leurs', 'mon', 'ma', 'mes', 'ton', 'ta',
-    'tes', 'son', 'sa', 'ses', 'aucun', 'aucune', 'quel', 'quelle', 'quels', 'quelles', 'tant',
-    'trop', 'peu', 'beaucoup', 'en', 'là', 'ci', 'ça', 'ceci', 'cela', 'celui', 'ceux',
-    'celle', 'celles', 'autre', 'autrui', 'lui', 'eux', 'elle', 'elles', 'moi', 'toi', 'eux-mêmes',
-    'soi-même', 'même', 'nul', 'personne', 'chacun', 'telle', 'tels', 'telles', 'toutes', 'rien',
-    'tout', 'cl', 'afin', 'puis']
+  static excludedWords = []
 
   static keyWordsMap = new Map()
   static ingredientsMap = new Map()
@@ -30,7 +20,7 @@ class InvertedIndex {
       this.#scanUstensils(recipe, id)
     })
 
-    this.#_excludedWords.forEach((excludedWord) => {
+    this.excludedWords.forEach((excludedWord) => {
       if (this.keyWordsMap.has(excludedWord)) {
         this.keyWordsMap.delete(excludedWord)
       }
