@@ -1,3 +1,4 @@
+// Constructor pattern pour les données 'ingredient'
 class IngredientEntity {
   constructor (data) {
     this._name = data.ingredient
@@ -10,6 +11,7 @@ class IngredientEntity {
   get unit () { return this._unit || '' }
 }
 
+// Constructor pattern pour les données 'recipe'.
 class RecipeEntity {
   constructor (data) {
     this._id = data.id

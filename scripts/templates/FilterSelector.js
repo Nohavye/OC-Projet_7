@@ -1,5 +1,6 @@
 import Template from './Template.js'
 
+// Class représentant un sélècteur personnalisé.
 class FilterSelector {
   #_matchExpression = /^/
   #_isExpanded = false
@@ -149,6 +150,7 @@ class FilterSelector {
     itemTemplate.HTMLContents.key.text = item
     itemTemplate.styles.key.cursor = 'pointer'
     itemTemplate.events.key.click = () => {
+      this.#toggle()
       document.dispatchEvent(new CustomEvent('selectItemFilter', {
         detail: {
           value: item,

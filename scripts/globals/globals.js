@@ -1,3 +1,4 @@
+// Référence aux éléments du DOM nécessaires au fonctionnement de la page.
 const DOM = {
   main: document.querySelector('main'),
   searchInput: document.querySelector('.inputSearch'),
@@ -6,6 +7,7 @@ const DOM = {
   selectorsContainer: document.querySelector('.selectorsContainer')
 }
 
+// Liste de mots non pertinants pour la recherche par mots clé.
 const excludedWords = ['le', 'la', 'les', 'une', 'un', 'des', 'du', 'de', 'au', 'aux',
   'et', 'ou', 'mais', 'que', 'qui', 'quoi', 'où', 'quand', 'comment', 'avec', 'pour', 'si',
   'par', 'sur', 'dans', 'vers', 'chez', 'jusque', 'jusqu', 'lorsque', 'ainsi', 'toujours',

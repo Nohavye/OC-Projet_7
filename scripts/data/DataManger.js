@@ -1,9 +1,11 @@
 import RecipeEntity from './RecipeEntity.js'
 
+// Enumérateur pour les format de données.
 const DataFormat = Object.freeze({
   Recipe: Symbol('recipe')
 })
 
+// Factory pattern pour la création de formats de données.
 class DataFactory {
   constructor (data, dataFormat) {
     switch (dataFormat) {
@@ -12,15 +14,19 @@ class DataFactory {
     }
   }
 }
+
+// Gestion des données.
 class DataManager {
   static #_data
 
+  // Charger les données provenant d'un fichier JSON.
   static async loadData (url) {
     this.#_data = await fetch(url)
       .then(answer => answer.json())
       .catch(error => console.error(error))
   }
 
+  // Récupérer une section de données au format spécifié.
   static getData (section, dataFormat) {
     try {
       if (typeof (dataFormat) !== 'undefined') {
@@ -37,6 +43,7 @@ class DataManager {
     }
   }
 
+  // Créer un table de hachage à partir de donées formatées.
   static hash (entities, property) {
     const hashTable = new Map()
     entities.forEach((entity) => {
