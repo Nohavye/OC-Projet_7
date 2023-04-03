@@ -110,24 +110,20 @@ function initEvents (searchInputHandler, tagsHandler, filters) {
       let keys = []
 
       keyWordsExpressions.forEach((keyWordExpression) => {
-        let keysKeyWords = []
+        let [keysKeyWords, keysIngredients, keysAppliances, keysUstensils] = [[], [], [], []]
 
         if (keyWordExpression instanceof RegExp) {
-          keysKeyWords = [
-            ...keysKeyWords,
-            ...GetIndexes.byKeyWord(keyWordExpression, Array.from(recipesMap.values()))
-          ]
+          keysKeyWords = GetIndexes.byKeyWord(keyWordExpression)
         }
-        const keysIngredients = GetIndexes.byIngredient(keyWordExpression) || []
-        const keysAppliances = GetIndexes.byAppliance(keyWordExpression) || []
-        const keysUstensils = GetIndexes.byUstensil(keyWordExpression) || []
-        const newKeys = [...keysKeyWords, ...keysIngredients, ...keysAppliances, ...keysUstensils]
 
-        if (keys.length === 0) {
-          keys = newKeys
-        } else {
-          keys = keys.filter(key => newKeys.includes(key))
+        if (typeof (keyWordExpression) === 'string') {
+          keysIngredients = GetIndexes.byIngredient(keyWordExpression)
+          keysAppliances = GetIndexes.byAppliance(keyWordExpression)
+          keysUstensils = GetIndexes.byUstensil(keyWordExpression)
         }
+
+        const newKeys = [...keysKeyWords, ...keysIngredients, ...keysAppliances, ...keysUstensils]
+        keys = keys.length === 0 ? newKeys : keys.filter(key => newKeys.includes(key))
       })
 
       updateDisplayedCards(keys)
