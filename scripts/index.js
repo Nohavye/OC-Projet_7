@@ -19,20 +19,21 @@ const components = {
   }
 }
 
+// Chargement des données.
 async function getRecipesMap () {
-  // Chargement des données.
   await Data.Manager.loadData('data/recipes.json')
   const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
   map.recipes = Data.Manager.hash(recipesEntities, 'id')
 }
 
+// Création des cartes de recette.
 function createCardMap () {
-  // Création des cartes
   map.recipes.forEach((recipeEntity, key) => {
     map.cards.set(key, new Templates.RecipeCard(recipeEntity))
   })
 }
 
+// Initialisation des sélècteurs de filtres personnalisés.
 function initFilters () {
   components.filters.ingredients.backgroundColor = '#3282F7'
   components.filters.appliances.backgroundColor = '#68D9A4'
@@ -43,6 +44,7 @@ function initFilters () {
   components.filters.ustensils.addTo(Globals.DOM.selectorsContainer)
 }
 
+// Actualiser l'affichage des cartes.
 function updateDisplayedCards (keys) {
   Globals.DOM.main.innerHTML = ''
 
@@ -59,6 +61,7 @@ function updateDisplayedCards (keys) {
   updateFilters(keys)
 }
 
+// Actualiser le contenu des sélècteurs de filtres personnalisés.
 function updateFilters (keys) {
   const ingredients = []
   const appliances = []
@@ -91,37 +94,36 @@ function updateFilters (keys) {
   components.filters.ustensils.itemsList = ustensils
 }
 
+// Initialisation des évènements.
 function initEvents () {
+  // Initialiser 'IndexesFinder'.
   IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
 
+  // Actualiser les critères de recherche et actualiser l'affichage des cartes en conséquence.
   function updateIndexesFinder () {
     IndexesFinder.setCriteria.expression(components.searchInput.value.length >= 3 ? components.searchInput.value : '')
     IndexesFinder.setCriteria.tagsList(components.tagsHandler.tagsList)
-    updateCards()
+    updateDisplayedCards(IndexesFinder.hasSearchCriteria ? IndexesFinder.indexes : undefined)
   }
 
-  function updateCards () {
-    if (IndexesFinder.hasSearchCriteria) {
-      updateDisplayedCards(IndexesFinder.indexes)
-    } else {
-      updateDisplayedCards()
-    }
-  }
-
+  // Évènement lié à la saisie dans l'entrée de recherche.
   components.searchInput.addEventListener('input', (e) => {
     updateIndexesFinder()
   })
 
+  // Évènement lié à l'ajout d'un tag de filtrage.
   document.addEventListener('addTag', (e) => {
     e.detail.emitter.items.exclude(e.detail.value)
     updateIndexesFinder()
   })
 
+  // Évènement lié au retrait d'un tag de filtrage.
   document.addEventListener('removeTag', (e) => {
     e.detail.emitter.items.include(e.detail.value)
     updateIndexesFinder()
   })
 
+  // Évènement lié à la sélèction d'un élément dans l'un des selecteurs de filtre.
   document.addEventListener('selectItemFilter', (e) => {
     components.tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
   })
