@@ -1,8 +1,7 @@
-// Référence aux éléments du DOM nécessaires au fonctionnement de la page.
+// Références aux éléments du DOM nécessaires au fonctionnement de la page.
 const DOM = {
   main: document.querySelector('main'),
   searchInput: document.querySelector('.inputSearch'),
-  buttonSearch: document.querySelector('.buttonSearch'),
   tagsContainer: document.querySelector('.tagsContainer'),
   selectorsContainer: document.querySelector('.selectorsContainer')
 }

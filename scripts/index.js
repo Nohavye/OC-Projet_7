@@ -92,35 +92,34 @@ function updateFilters (keys) {
 }
 
 function initEvents () {
-  IndexesFinder.setIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
+  IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
 
-  function updateKeyWordsExpressions () {
-    IndexesFinder.tagsList = components.tagsHandler.tagsList
-    IndexesFinder.expression = components.searchInput.value.length >= 3 ? components.searchInput.value : ''
+  function updateIndexesFinder () {
+    IndexesFinder.setCriteria.expression(components.searchInput.value.length >= 3 ? components.searchInput.value : '')
+    IndexesFinder.setCriteria.tagsList(components.tagsHandler.tagsList)
     updateCards()
   }
 
   function updateCards () {
-    if (IndexesFinder.expression !== '' | IndexesFinder.tagsList.length > 0) {
-      const keys = IndexesFinder.indexes
-      updateDisplayedCards(keys)
+    if (IndexesFinder.hasSearchCriteria) {
+      updateDisplayedCards(IndexesFinder.indexes)
     } else {
       updateDisplayedCards()
     }
   }
 
   components.searchInput.addEventListener('input', (e) => {
-    updateKeyWordsExpressions()
+    updateIndexesFinder()
   })
 
   document.addEventListener('addTag', (e) => {
     e.detail.emitter.items.exclude(e.detail.value)
-    updateKeyWordsExpressions()
+    updateIndexesFinder()
   })
 
   document.addEventListener('removeTag', (e) => {
     e.detail.emitter.items.include(e.detail.value)
-    updateKeyWordsExpressions()
+    updateIndexesFinder()
   })
 
   document.addEventListener('selectItemFilter', (e) => {
