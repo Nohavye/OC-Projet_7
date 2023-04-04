@@ -43,10 +43,12 @@ class IndexesFinder {
   static #indexesByKeyWords () {
     const keyWords = this.#extractKeyWords(this.#_expression)
     let returnedKeys = []
+
     keyWords.forEach((keyWord) => {
       const newKeys = this.#indexesByKeyWord(new RegExp(`^${keyWord}`, 'i'))
       returnedKeys = returnedKeys.length === 0 ? newKeys : returnedKeys.filter(key => newKeys.includes(key))
     })
+
     return returnedKeys
   }
 
@@ -60,9 +62,11 @@ class IndexesFinder {
   /*  Retourne les indexes des entités correspondant au mot clé
       passé en paramètre. */
   static #indexesByKeyWord (expression) {
-    return this.#_entities.filter((recipe) => {
-      return this.#searchExpression(expression, recipe)
-    }).map(recipe => recipe.id)
+    const returnedIndexes = []
+    for (let i = 0; i < this.#_entities.length; i++) {
+      if (this.#searchExpression(expression, this.#_entities[i])) returnedIndexes.push(this.#_entities[i].id)
+    }
+    return returnedIndexes
   }
 
   /*  Cherche une correspondance au mot clé passé en paramètre dans une
@@ -81,40 +85,60 @@ class IndexesFinder {
     testedText.add(recipe.name)
     testedText.add(recipe.description)
 
-    recipe.ingredients.forEach((ingredient) => {
-      testedText.add(ingredient.name)
-    })
+    for (let i = 0; i < recipe.ingredients.length; i++) {
+      testedText.add(recipe.ingredients[i].name)
+    }
 
     const keyWords = this.#extractKeyWords(testedText.value)
-    return keyWords.some(keyWord => expression.test(keyWord))
+
+    for (let i = 0; i < keyWords.length; i++) {
+      if (expression.test(keyWords[i])) return true
+    }
+    return false
   }
 
   /*  Retourne les indexes des entités de recette contenant
       l'ingrédient passé en paramètre. */
   static #indexesByIngredient (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.ingredients.find((ingredient) => {
-        return ingredient.name === expression
-      })
-    }).map(recipe => recipe.id)
+    const returnedIndexes = []
+    for (let i = 0; i < this.#_entities.length; i++) {
+      if (findIngredient(expression, this.#_entities[i].ingredients)) returnedIndexes.push(this.#_entities[i].id)
+    }
+
+    function findIngredient (expression, ingredients) {
+      for (let i = 0; i < ingredients.length; i++) {
+        if (ingredients[i].name === expression) return true
+      }
+      return false
+    }
+    return returnedIndexes
   }
 
   /*  Retourne les indexes des entités de recette contenant
       l'appareil passé en paramètre. */
   static #indexesByAppliance (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.appliance === expression
-    }).map(recipe => recipe.id)
+    const returnedIndexes = []
+    for (let i = 0; i < this.#_entities.length; i++) {
+      if (this.#_entities[i].appliance === expression) returnedIndexes.push(this.#_entities[i].id)
+    }
+    return returnedIndexes
   }
 
   /*  Retourne les indexes des entités de recette contenant
       l'ustensile passé en paramètre. */
   static #indexesByUstensil (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.ustensils.find((ustensil) => {
-        return ustensil === expression
-      })
-    }).map(recipe => recipe.id)
+    const returnedIndexes = []
+    for (let i = 0; i < this.#_entities.length; i++) {
+      if (findUstensil(expression, this.#_entities[i].ustensils)) returnedIndexes.push(this.#_entities[i].id)
+    }
+
+    function findUstensil (expression, ustensils) {
+      for (let i = 0; i < ustensils.length; i++) {
+        if (ustensils[i] === expression) return true
+      }
+      return false
+    }
+    return returnedIndexes
   }
 }
 
