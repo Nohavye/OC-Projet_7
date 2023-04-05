@@ -10,6 +10,8 @@ const map = {
 
 const components = {
   searchInput: Globals.DOM.searchInput,
+  cardsCounterText: Globals.DOM.cardsCounterText,
+  cardsCounterCross: Globals.DOM.cardsCounterCross,
   tagsHandler: new Templates.TagsHandler(Globals.DOM.tagsContainer),
 
   filters: {
@@ -58,7 +60,9 @@ function updateDisplayedCards (keys) {
     })
   }
 
+  // Actualiser le contenu des sélècteurs et du compteur.
   updateFilters(keys)
+  updateCardsCounter()
 }
 
 // Actualiser le contenu des sélècteurs de filtres personnalisés.
@@ -94,12 +98,20 @@ function updateFilters (keys) {
   components.filters.ustensils.itemsList = ustensils
 }
 
+// Actualiser le compteur de résultats.
+function updateCardsCounter () {
+  const nbCards = Globals.DOM.main.childElementCount
+  components.cardsCounterText.textContent = nbCards > 1 ? `${nbCards} résultats` : `${nbCards} résultat`
+  components.cardsCounterCross.style.display = components.searchInput.value.length > 0 ? 'block' : 'none'
+}
+
 // Initialisation des évènements.
 function initEvents () {
-  Globals.DOM.searchInput.value = ''
-
-  // Initialiser 'IndexesFinder'.
-  IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
+  // Réinitialiser l'entrée de recherche par mots clé.
+  function resetSearchInput () {
+    components.searchInput.value = ''
+    updateIndexesFinder()
+  }
 
   // Actualiser les critères de recherche et actualiser l'affichage des cartes en conséquence.
   function updateIndexesFinder () {
@@ -108,9 +120,20 @@ function initEvents () {
     updateDisplayedCards(IndexesFinder.hasSearchCriteria ? IndexesFinder.indexes : undefined)
   }
 
+  // Réinitialiser l'entrée de recherche
+  resetSearchInput()
+
+  // Initialiser 'IndexesFinder'.
+  IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
+
   // Évènement lié à la saisie dans l'entrée de recherche.
   components.searchInput.addEventListener('input', (e) => {
     updateIndexesFinder()
+  })
+
+  // Réinitialiser l'entrée de recherche.
+  components.cardsCounterCross.addEventListener('click', () => {
+    resetSearchInput()
   })
 
   // Évènement lié à l'ajout d'un tag de filtrage.
@@ -135,7 +158,6 @@ async function init () {
   await getRecipesMap()
   initFilters()
   createCardMap()
-  updateDisplayedCards()
   initEvents()
 }
 
