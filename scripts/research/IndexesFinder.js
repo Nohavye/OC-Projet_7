@@ -6,9 +6,9 @@ class IndexesFinder {
   static #_tagsList = [] // Critère de recherche: liste de tags pour la recherche par tags.
 
   // Paramètres d'initialisation.
-  static initIndexesFinder (recipesEntities, excludedWord) {
+  static initIndexesFinder (recipesEntities, excludedWords) {
     this.#_entities = recipesEntities || []
-    this.#_excludedWords = excludedWord || []
+    this.#_excludedWords = excludedWords || []
   }
 
   // Status des critères de recherche.
@@ -43,18 +43,36 @@ class IndexesFinder {
   static #indexesByKeyWords () {
     const keyWords = this.#extractKeyWords(this.#_expression)
     let returnedKeys = []
-    keyWords.forEach((keyWord) => {
-      const newKeys = this.#indexesByKeyWord(new RegExp(`^${keyWord}`, 'i'))
-      returnedKeys = returnedKeys.length === 0 ? newKeys : returnedKeys.filter(key => newKeys.includes(key))
-    })
+
+    if (keyWords.length > 0) {
+      keyWords.forEach((keyWord) => {
+        const newKeys = this.#indexesByKeyWord(new RegExp(`^${keyWord}`, 'i'))
+        returnedKeys = returnedKeys.length === 0 ? newKeys : returnedKeys.filter(key => newKeys.includes(key))
+      })
+    } else {
+      returnedKeys = this.#_entities.map(recipe => recipe.id)
+    }
+
     return returnedKeys
   }
 
   // Extraire les mots clé d'une chaîne de charactère.
-  static #extractKeyWords (expression) {
-    return expression.split(this.#_wordBreaker)
-      .filter(word => !this.#_excludedWords.includes(word))
-      .filter(word => word.length > 1)
+  static #extractKeyWords (expression, excludeWords = true) {
+    const excludedWordsTest = (word) => {
+      for (let i = 0; i < this.#_excludedWords.length; i++) {
+        const regexp = new RegExp(`^${this.#_excludedWords[i]}$`, 'i')
+        if (regexp.test(word)) {
+          return false
+        }
+      }
+      return true
+    }
+
+    let keyWords = expression.split(this.#_wordBreaker)
+    if (excludeWords) keyWords = keyWords.filter(word => excludedWordsTest(word))
+    keyWords = keyWords.filter(word => word.length > 1)
+
+    return keyWords
   }
 
   /*  Retourne les indexes des entités correspondant au mot clé
@@ -85,7 +103,7 @@ class IndexesFinder {
       testedText.add(ingredient.name)
     })
 
-    const keyWords = this.#extractKeyWords(testedText.value)
+    const keyWords = this.#extractKeyWords(testedText.value, false)
     return keyWords.some(keyWord => expression.test(keyWord))
   }
 
