@@ -152,6 +152,12 @@ function initEvents () {
   document.addEventListener('selectItemFilter', (e) => {
     components.tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
   })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.key === 'b') {
+      IndexesFinder.showPerformance()
+    }
+  })
 }
 
 async function init () {

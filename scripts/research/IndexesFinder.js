@@ -5,6 +5,8 @@ class IndexesFinder {
   static #_expression = '' // Critère de recherche: expression pour la recherche par mot clé.
   static #_tagsList = [] // Critère de recherche: liste de tags pour la recherche par tags.
 
+  static requestProcessingTimes = []
+
   // Paramètres d'initialisation.
   static initIndexesFinder (recipesEntities, excludedWords) {
     this.#_entities = recipesEntities || []
@@ -22,8 +24,29 @@ class IndexesFinder {
     tagsList: (value) => { this.#_tagsList = value }
   }
 
+  static showPerformance () {
+    const minTime = this.requestProcessingTimes.length > 0 ? `${(Math.min(...this.requestProcessingTimes)).toFixed(3)} ms` : '--'
+    const maxTime = this.requestProcessingTimes.length > 0 ? `${(Math.max(...this.requestProcessingTimes)).toFixed(3)} ms` : '--'
+    const averageTime = this.requestProcessingTimes.length > 0
+      ? `${(this.requestProcessingTimes.reduce((total, value) => total + value, 0) / this.requestProcessingTimes.length).toFixed(3)} ms`
+      : '--'
+
+    console.log(`
+      Bilan de performance:
+
+      Nombre de requètes: ${this.requestProcessingTimes.length}
+
+      Temps de réponse:
+      
+        minimum: ${minTime} | maximum: ${maxTime}
+      
+        moyenne: ${averageTime}
+    `)
+  }
+
   // Retourne les indexes des entités correspondants au critères de recherche.
   static get indexes () {
+    const start = performance.now()
     let indexes = this.#_expression !== '' ? this.#indexesByKeyWords() : []
 
     this.#_tagsList.forEach((tag) => {
@@ -34,6 +57,8 @@ class IndexesFinder {
       const indexesTags = [...indexesIngredients, ...indexesAppliances, ...indexesUstensils]
       indexes = indexes.length === 0 ? indexesTags : indexes.filter(key => indexesTags.includes(key))
     })
+
+    this.requestProcessingTimes.push(performance.now() - start)
     return indexes
   }
 
