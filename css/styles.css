@@ -36,6 +36,7 @@ main {
   box-sizing: border-box;
   padding: 15px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 15px;
   margin-top: 20px;
@@ -51,6 +52,29 @@ main {
   font-weight: 400;
   font-size: 18px;
   line-height: 22px;
+}
+
+.cardsCounter {
+  color: white;
+  width: max-content;
+  margin-right: 20px;
+  background-color: #aaa;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.cardsCounter p {
+  width: max-content;
+}
+
+.cardsCounter img {
+  cursor: pointer;
 }
 
 .tagsContainer {

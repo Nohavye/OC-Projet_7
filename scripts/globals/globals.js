@@ -2,6 +2,8 @@
 const DOM = {
   main: document.querySelector('main'),
   searchInput: document.querySelector('.inputSearch'),
+  cardsCounterText: document.querySelector('.cardsCounterText'),
+  cardsCounterCross: document.querySelector('.cardsCounterCross'),
   tagsContainer: document.querySelector('.tagsContainer'),
   selectorsContainer: document.querySelector('.selectorsContainer')
 }
