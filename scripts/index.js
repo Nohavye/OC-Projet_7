@@ -96,6 +96,8 @@ function updateFilters (keys) {
 
 // Initialisation des évènements.
 function initEvents () {
+  Globals.DOM.searchInput.value = ''
+
   // Initialiser 'IndexesFinder'.
   IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
 
