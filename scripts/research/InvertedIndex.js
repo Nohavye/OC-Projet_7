@@ -55,7 +55,7 @@ class InvertedIndex {
     })
   }
 
-  // Créer un mot clé dans l'index inversé s'il n'existe pas et y
+  // Créer un mot clé dans l'indexe inversé s'il n'existe pas et y
   // ajouter l'indexe de la recette correspondante. S'il existe,
   // y ajouter l'indexe de la recette correspondante.
   static #updateKeyWord (word, id) {
@@ -78,7 +78,7 @@ class InvertedIndex {
     })
   }
 
-  // Créer un ingrédient dans l'index inversé s'il n'existe pas et y
+  // Créer un ingrédient dans l'indexe inversé s'il n'existe pas et y
   // ajouter l'indexe de la recette correspondante. S'il existe,
   // y ajouter l'indexe de la recette correspondante.
   static #updateIngredient (ingredient, id) {
@@ -96,7 +96,7 @@ class InvertedIndex {
     this.#updateAppliance(recipe.appliance, id)
   }
 
-  // Créer un appareil dans l'index inversé s'il n'existe pas et y
+  // Créer un appareil dans l'indexe inversé s'il n'existe pas et y
   // ajouter l'indexe de la recette correspondante. S'il existe,
   // y ajouter l'indexe de la recette correspondante.
   static #updateAppliance (appliance, id) {
@@ -116,7 +116,7 @@ class InvertedIndex {
     })
   }
 
-  // Créer un ustensile dans l'index inversé s'il n'existe pas et y
+  // Créer un ustensile dans l'indexe inversé s'il n'existe pas et y
   // ajouter l'indexe de la recette correspondante. S'il existe,
   // y ajouter l'indexe de la recette correspondante.
   static #updateUstensil (ustensil, id) {

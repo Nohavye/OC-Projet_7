@@ -125,6 +125,11 @@ class FilterSelector {
   #toggle () {
     if (this.#_isExpanded) {
       this.#_isExpanded = false
+
+      this._template.header.input.element.value = ''
+      this.#setMatchExpression('')
+      this.#updateDisplayedItems()
+
       this._template.list.styles.key.display = 'none'
       this._template.header.arrow.attributes.key.src = 'assets/arrow_down.svg'
     } else {
@@ -151,7 +156,7 @@ class FilterSelector {
     itemTemplate.styles.key.cursor = 'pointer'
     itemTemplate.events.key.click = () => {
       this.#toggle()
-      this._template.header.input.element.value = ''
+
       document.dispatchEvent(new CustomEvent('selectItemFilter', {
         detail: {
           value: item,

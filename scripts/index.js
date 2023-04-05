@@ -1,75 +1,72 @@
 import Data from './data/DataModule.js'
 import Globals from './globals/globals.js'
-import InvertedIndex from './research/InvertedIndex.js'
-import RecipeCard from './templates/RecipeCard.js'
 import Templates from './templates/TemplatesModule.js'
+import IndexesFinder from './research/IndexesFinder.js'
 
-let recipesMap = new Map()
-const cardsMap = new Map()
+const map = {
+  recipes: new Map(),
+  cards: new Map()
+}
 
+const components = {
+  searchInput: Globals.DOM.searchInput,
+  cardsCounterText: Globals.DOM.cardsCounterText,
+  cardsCounterCross: Globals.DOM.cardsCounterCross,
+  tagsHandler: new Templates.TagsHandler(Globals.DOM.tagsContainer),
+
+  filters: {
+    ingredients: new Templates.FilterSelector('ingredients', 'Ingredients'),
+    appliances: new Templates.FilterSelector('appliances', 'Appareils'),
+    ustensils: new Templates.FilterSelector('ustensils', 'Ustensiles')
+  }
+}
+
+// Chargement des données.
 async function getRecipesMap () {
-  // Chargement des données.
   await Data.Manager.loadData('data/recipes.json')
   const recipesEntities = Data.Manager.getData('recipes', Data.DataFormat.Recipe)
-  recipesMap = Data.Manager.hash(recipesEntities, 'id')
+  map.recipes = Data.Manager.hash(recipesEntities, 'id')
 }
 
-function updateInvertedIndex () {
-  // Création de l'indexe inversé.
-  InvertedIndex.excludedWords = Globals.excludedWords
-  InvertedIndex.updateMaps(recipesMap)
-}
-
+// Création des cartes de recette.
 function createCardMap () {
-  // Création des cartes
-  recipesMap.forEach((recipeEntity, key, map) => {
-    cardsMap.set(key, new RecipeCard(recipeEntity))
+  map.recipes.forEach((recipeEntity, key) => {
+    map.cards.set(key, new Templates.RecipeCard(recipeEntity))
   })
 }
 
-function createSearchInputHandler () {
-  return new Templates.SearchInputHandler(
-    Globals.DOM.searchInput,
-    Globals.DOM.buttonSearch,
-    Globals.excludedWords
-  )
+// Initialisation des sélècteurs de filtres personnalisés.
+function initFilters () {
+  components.filters.ingredients.backgroundColor = '#3282F7'
+  components.filters.appliances.backgroundColor = '#68D9A4'
+  components.filters.ustensils.backgroundColor = '#ED6454'
+
+  components.filters.ingredients.addTo(Globals.DOM.selectorsContainer)
+  components.filters.appliances.addTo(Globals.DOM.selectorsContainer)
+  components.filters.ustensils.addTo(Globals.DOM.selectorsContainer)
 }
 
-function createTagsHandler () {
-  return new Templates.TagsHandler(Globals.DOM.tagsContainer)
-}
-
-function createFilters () {
-  const ingredientsFilter = new Templates.FilterSelector('ingredients', 'Ingredients')
-  const appliancesFilter = new Templates.FilterSelector('appliances', 'Appareils')
-  const ustensilsFilter = new Templates.FilterSelector('ustensils', 'Ustensiles')
-
-  ingredientsFilter.backgroundColor = '#3282F7'
-  appliancesFilter.backgroundColor = '#68D9A4'
-  ustensilsFilter.backgroundColor = '#ED6454'
-
-  ingredientsFilter.addTo(Globals.DOM.selectorsContainer)
-  appliancesFilter.addTo(Globals.DOM.selectorsContainer)
-  ustensilsFilter.addTo(Globals.DOM.selectorsContainer)
-
-  return { ingredients: ingredientsFilter, appliances: appliancesFilter, ustensils: ustensilsFilter }
-}
-
+// Actualiser l'affichage des cartes.
 function updateDisplayedCards (keys) {
   Globals.DOM.main.innerHTML = ''
 
   if (typeof (keys) === 'undefined') {
-    for (const value of cardsMap.values()) {
+    for (const value of map.cards.values()) {
       value.addTo(Globals.DOM.main)
     }
   } else {
     keys.forEach((key) => {
-      cardsMap.get(key).addTo(Globals.DOM.main)
+      map.cards.get(key).addTo(Globals.DOM.main)
     })
   }
+
+  // Actualiser le contenu des sélècteurs et du compteur.
+  updateFilters(keys)
+  updateCardsCounter()
 }
 
-function updateFilters (filters, keys) {
+// Actualiser le contenu des sélècteurs de filtres personnalisés.
+function updateFilters (keys) {
   const ingredients = []
   const appliances = []
   const ustensils = []
@@ -87,93 +84,87 @@ function updateFilters (filters, keys) {
   }
 
   if (typeof (keys) === 'undefined') {
-    for (const recipe of recipesMap.values()) {
+    for (const recipe of map.recipes.values()) {
       addItems(recipe)
     }
   } else {
     keys.forEach((key) => {
-      addItems(recipesMap.get(key))
+      addItems(map.recipes.get(key))
     })
   }
 
-  filters.ingredients.itemsList = ingredients
-  filters.appliances.itemsList = appliances
-  filters.ustensils.itemsList = ustensils
+  components.filters.ingredients.itemsList = ingredients
+  components.filters.appliances.itemsList = appliances
+  components.filters.ustensils.itemsList = ustensils
 }
 
-function initEvents (searchInputHandler, tagsHandler, filters) {
-  let keyWordsExpressions = []
+// Actualiser le compteur de résultats.
+function updateCardsCounter () {
+  const nbCards = Globals.DOM.main.childElementCount
+  components.cardsCounterText.textContent = nbCards > 1 ? `${nbCards} résultats` : `${nbCards} résultat`
+  components.cardsCounterCross.style.display = components.searchInput.value.length > 0 ? 'block' : 'none'
+}
 
-  function updateKeyWordsExpressions () {
-    keyWordsExpressions = [...searchInputHandler.matchingExpressions, ...tagsHandler.tagsList]
+// Initialisation des évènements.
+function initEvents () {
+  // Réinitialiser l'entrée de recherche par mots clé.
+  function resetSearchInput () {
+    components.searchInput.value = ''
+    updateIndexesFinder()
   }
 
-  function updateWithExpressions () {
-    if (keyWordsExpressions.length !== 0) {
-      let keys = []
-
-      keyWordsExpressions.forEach((keyWordExpression) => {
-        let [keysKeyWords, keysIngredients, keysAppliances, keysUstensils] = [[], [], [], []]
-
-        if (keyWordExpression instanceof RegExp) {
-          InvertedIndex.keyWordsMap.forEach((value, key) => {
-            if (keyWordExpression.test(key)) { keysKeyWords = [...keysKeyWords, ...value] }
-          })
-        }
-
-        if (typeof (keyWordExpression) === 'string') {
-          keysIngredients = InvertedIndex.ingredientsMap.get(keyWordExpression) || []
-          keysAppliances = InvertedIndex.appliancesMap.get(keyWordExpression) || []
-          keysUstensils = InvertedIndex.ustensilsMap.get(keyWordExpression) || []
-        }
-
-        const newKeys = [...keysKeyWords, ...keysIngredients, ...keysAppliances, ...keysUstensils]
-        keys = keys.length === 0 ? newKeys : keys.filter(key => newKeys.includes(key))
-      })
-
-      updateDisplayedCards(keys)
-      updateFilters(filters, keys)
-    } else {
-      updateDisplayedCards()
-      updateFilters(filters)
-    }
+  // Actualiser les critères de recherche et actualiser l'affichage des cartes en conséquence.
+  function updateIndexesFinder () {
+    IndexesFinder.setCriteria.expression(components.searchInput.value.length >= 3 ? components.searchInput.value : '')
+    IndexesFinder.setCriteria.tagsList(components.tagsHandler.tagsList)
+    updateDisplayedCards(IndexesFinder.hasSearchCriteria ? IndexesFinder.indexes : undefined)
   }
 
-  searchInputHandler.inputElement.addEventListener('inputKeyWord', (e) => {
-    updateKeyWordsExpressions()
-    updateWithExpressions()
+  // Réinitialiser l'entrée de recherche.
+  resetSearchInput()
+
+  // Initialiser 'IndexesFinder'.
+  IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
+
+  // Évènement lié à la saisie dans l'entrée de recherche.
+  components.searchInput.addEventListener('input', (e) => {
+    updateIndexesFinder()
   })
 
+  // Réinitialiser l'entrée de recherche.
+  components.cardsCounterCross.addEventListener('click', () => {
+    resetSearchInput()
+  })
+
+  // Évènement lié à l'ajout d'un tag de filtrage.
   document.addEventListener('addTag', (e) => {
     e.detail.emitter.items.exclude(e.detail.value)
-    updateKeyWordsExpressions()
-    updateWithExpressions()
+    updateIndexesFinder()
   })
 
+  // Évènement lié au retrait d'un tag de filtrage.
   document.addEventListener('removeTag', (e) => {
     e.detail.emitter.items.include(e.detail.value)
-    updateKeyWordsExpressions()
-    updateWithExpressions()
+    updateIndexesFinder()
   })
 
+  // Évènement lié à la sélèction d'un élément dans l'un des selecteurs de filtre.
   document.addEventListener('selectItemFilter', (e) => {
-    tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
+    components.tagsHandler.addTag(e.detail.value, e.detail.emitter.backgroundColor, e.detail.emitter)
+  })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.key === 'b') {
+      IndexesFinder.showPerformance()
+    }
   })
 }
 
 async function init () {
   await getRecipesMap()
-  updateInvertedIndex()
-
-  const searchInputHandler = createSearchInputHandler()
-  const tagsHandler = createTagsHandler()
-  const filters = createFilters()
-
+  initFilters()
   createCardMap()
-  updateDisplayedCards()
-  updateFilters(filters)
-
-  initEvents(searchInputHandler, tagsHandler, filters)
+  initEvents()
 }
 
 init()

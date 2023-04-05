@@ -1,10 +1,10 @@
 import FilterSelector from './FilterSelector.js'
-import SearchInputHandler from './SearchInputHandler.js'
+import RecipeCard from './RecipeCard.js'
 import TagsHandler from './TagsHandler.js'
 
 const Templates = {
   FilterSelector,
-  SearchInputHandler,
+  RecipeCard,
   TagsHandler
 }
 
