@@ -36,7 +36,7 @@ class IndexesFinder {
 
     console.log(`
       Bilan de performance:
-      Création de l'indexe inversé: ${this.#_createInvertedIndexProcessingTime} ms
+      Création de l'indexe inversé: ${this.#_createInvertedIndexProcessingTime.toFixed(3)} ms
       Nombre de requètes: ${this.#_requestProcessingTimes.length}
       Temps de réponse:
       
