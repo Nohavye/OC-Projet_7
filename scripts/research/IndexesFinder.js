@@ -82,22 +82,12 @@ class IndexesFinder {
   }
 
   // Extraire les mots clé d'une chaîne de charactère.
-  static #extractKeyWords (expression, excludeWords = true) {
-    const excludedWordsTest = (word) => {
-      for (let i = 0; i < this.#_excludedWords.length; i++) {
-        const regexp = new RegExp(`^${this.#_excludedWords[i]}$`, 'i')
-        if (regexp.test(word)) {
-          return false
-        }
-      }
-      return true
-    }
+  static #extractKeyWords (expression) {
+    expression = expression.toLowerCase()
 
-    let keyWords = expression.split(this.#_wordBreaker)
-    if (excludeWords) keyWords = keyWords.filter(word => excludedWordsTest(word))
-    keyWords = keyWords.filter(word => word.length > 1)
-
-    return keyWords
+    return expression.split(this.#_wordBreaker)
+      .filter(word => !this.#_excludedWords.includes(word))
+      .filter(word => word.length > 1)
   }
 
   /*  Retourne les indexes des entités correspondant au mot clé
@@ -130,7 +120,7 @@ class IndexesFinder {
       testedText.add(recipe.ingredients[i].name)
     }
 
-    const keyWords = this.#extractKeyWords(testedText.value, false)
+    const keyWords = this.#extractKeyWords(testedText.value)
 
     for (let i = 0; i < keyWords.length; i++) {
       if (expression.test(keyWords[i])) return true
