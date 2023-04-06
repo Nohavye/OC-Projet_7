@@ -65,14 +65,12 @@ class IndexesFinder {
   }
 
   // Extraire les mots clé d'une chaîne de charactère.
-  static #extractKeyWords (expression, excludeWords = true) {
+  static #extractKeyWords (expression) {
     expression = expression.toLowerCase()
 
-    let keyWords = expression.split(this.#_wordBreaker)
-    if (excludeWords) keyWords = keyWords.filter(word => !this.#_excludedWords.includes(word))
-    keyWords = keyWords.filter(word => word.length > 1)
-
-    return keyWords
+    return expression.split(this.#_wordBreaker)
+      .filter(word => !this.#_excludedWords.includes(word))
+      .filter(word => word.length > 1)
   }
 
   /*  Traitement de la chaîne de caractère 'this.#_expression'.
