@@ -120,11 +120,11 @@ function initEvents () {
     updateDisplayedCards(IndexesFinder.hasSearchCriteria ? IndexesFinder.indexes : undefined)
   }
 
+  // Initialiser 'IndexesFinder'.
+  IndexesFinder.initIndexesFinder(map.recipes, Globals.excludedWords)
+
   // Réinitialiser l'entrée de recherche.
   resetSearchInput()
-
-  // Initialiser 'IndexesFinder'.
-  IndexesFinder.initIndexesFinder(Array.from(map.recipes.values()), Globals.excludedWords)
 
   // Évènement lié à la saisie dans l'entrée de recherche.
   components.searchInput.addEventListener('input', (e) => {

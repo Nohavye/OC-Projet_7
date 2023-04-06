@@ -1,21 +1,24 @@
+import InvertedIndex from './InvertedIndex.js'
 class IndexesFinder {
   static #_wordBreaker = /[ ,’';:!?.()°%/\\0-9]+/ // Séparateur pour la découpe de phrase en mots.
   static #_excludedWords = [] // Liste de mots non pertinants pour la recherche par mots clé.
-  static #_entities = [] // Liste d'éntités de recette.
   static #_expression = '' // Critère de recherche: expression pour la recherche par mot clé.
   static #_tagsList = [] // Critère de recherche: liste de tags pour la recherche par tags.
 
-  static requestProcessingTimes = []
+  static #_createInvertedIndexProcessingTime
+  static #_requestProcessingTimes = []
 
   // Paramètres d'initialisation.
-  static initIndexesFinder (recipesEntities, excludedWords) {
-    this.#_entities = recipesEntities || []
-    this.#_excludedWords = excludedWords || []
+  static initIndexesFinder (recipesMap, excludedWords) {
+    this.#_excludedWords = excludedWords
+    const start = performance.now()
+    InvertedIndex.updateMaps(recipesMap, this.#_excludedWords)
+    this.#_createInvertedIndexProcessingTime = performance.now() - start
   }
 
   // Status des critères de recherche.
   static get hasSearchCriteria () {
-    return ((this.#_expression !== '' || this.#_tagsList.length > 0) && this.#_entities.length > 0)
+    return (this.#_expression !== '' || this.#_tagsList.length > 0)
   }
 
   // Critères de recherches.
@@ -25,15 +28,16 @@ class IndexesFinder {
   }
 
   static showPerformance () {
-    const minTime = this.requestProcessingTimes.length > 0 ? `${(Math.min(...this.requestProcessingTimes)).toFixed(3)} ms` : '--'
-    const maxTime = this.requestProcessingTimes.length > 0 ? `${(Math.max(...this.requestProcessingTimes)).toFixed(3)} ms` : '--'
-    const averageTime = this.requestProcessingTimes.length > 0
-      ? `${(this.requestProcessingTimes.reduce((total, value) => total + value, 0) / this.requestProcessingTimes.length).toFixed(3)} ms`
+    const minTime = this.#_requestProcessingTimes.length > 0 ? `${(Math.min(...this.#_requestProcessingTimes)).toFixed(3)} ms` : '--'
+    const maxTime = this.#_requestProcessingTimes.length > 0 ? `${(Math.max(...this.#_requestProcessingTimes)).toFixed(3)} ms` : '--'
+    const averageTime = this.#_requestProcessingTimes.length > 0
+      ? `${(this.#_requestProcessingTimes.reduce((total, value) => total + value, 0) / this.#_requestProcessingTimes.length).toFixed(3)} ms`
       : '--'
 
     console.log(`
       Bilan de performance:
-      Nombre de requètes: ${this.requestProcessingTimes.length}
+      Création de l'indexe inversé: ${this.#_createInvertedIndexProcessingTime} ms
+      Nombre de requètes: ${this.#_requestProcessingTimes.length}
       Temps de réponse:
       
         minimum: ${minTime} | maximum: ${maxTime}
@@ -48,16 +52,27 @@ class IndexesFinder {
     let indexes = this.#_expression !== '' ? this.#indexesByKeyWords() : []
 
     this.#_tagsList.forEach((tag) => {
-      const indexesIngredients = this.#indexesByIngredient(tag)
-      const indexesAppliances = this.#indexesByAppliance(tag)
-      const indexesUstensils = this.#indexesByUstensil(tag)
+      const indexesIngredients = InvertedIndex.ingredientsMap.get(tag) || []
+      const indexesAppliances = InvertedIndex.appliancesMap.get(tag) || []
+      const indexesUstensils = InvertedIndex.ustensilsMap.get(tag) || []
 
       const indexesTags = [...indexesIngredients, ...indexesAppliances, ...indexesUstensils]
       indexes = indexes.length === 0 ? indexesTags : indexes.filter(key => indexesTags.includes(key))
     })
 
-    this.requestProcessingTimes.push(performance.now() - start)
+    this.#_requestProcessingTimes.push(performance.now() - start)
     return indexes
+  }
+
+  // Extraire les mots clé d'une chaîne de charactère.
+  static #extractKeyWords (expression, excludeWords = true) {
+    expression = expression.toLowerCase()
+
+    let keyWords = expression.split(this.#_wordBreaker)
+    if (excludeWords) keyWords = keyWords.filter(word => !this.#_excludedWords.includes(word))
+    keyWords = keyWords.filter(word => word.length > 1)
+
+    return keyWords
   }
 
   /*  Traitement de la chaîne de caractère 'this.#_expression'.
@@ -73,89 +88,33 @@ class IndexesFinder {
         returnedKeys = returnedKeys.length === 0 ? newKeys : returnedKeys.filter(key => newKeys.includes(key))
       })
     } else {
-      returnedKeys = this.#_entities.map(recipe => recipe.id)
+      returnedKeys = InvertedIndex.keyWordsMap.get('_allIndexes')
     }
 
     return returnedKeys
   }
 
-  // Extraire les mots clé d'une chaîne de charactère.
-  static #extractKeyWords (expression, excludeWords = true) {
-    const excludedWordsTest = (word) => {
-      for (let i = 0; i < this.#_excludedWords.length; i++) {
-        const regexp = new RegExp(`^${this.#_excludedWords[i]}$`, 'i')
-        if (regexp.test(word)) {
-          return false
-        }
-      }
-      return true
-    }
-
-    let keyWords = expression.split(this.#_wordBreaker)
-    if (excludeWords) keyWords = keyWords.filter(word => excludedWordsTest(word))
-    keyWords = keyWords.filter(word => word.length > 1)
-
-    return keyWords
-  }
-
   /*  Retourne les indexes des entités correspondant au mot clé
       passé en paramètre. */
   static #indexesByKeyWord (expression) {
-    return this.#_entities.filter((recipe) => {
-      return this.#searchExpression(expression, recipe)
-    }).map(recipe => recipe.id)
-  }
+    let returnedIndexes = []
 
-  /*  Cherche une correspondance au mot clé passé en paramètre dans une
-      entité de recette. La recherche se focalise sur les propriétés 'name',
-      'description' et 'ingredients(name)' de la recette.
-      La fonction retourne 'true' dés la première correspondance,
-      et false si aucune correspondance n'est trouvée. */
-  static #searchExpression (expression, recipe) {
-    const testedText = {
-      value: '',
-      add: function (text) {
-        this.value = this.value + text + ' '
+    for (const key of InvertedIndex.keyWordsMap.keys()) {
+      if (expression.test(key)) {
+        const newKeys = InvertedIndex.keyWordsMap.get(key)
+
+        if (returnedIndexes.length > 0) {
+          returnedIndexes = [
+            ...returnedIndexes,
+            ...newKeys.filter(value => !returnedIndexes.includes(value))
+          ]
+        } else {
+          returnedIndexes = newKeys
+        }
       }
     }
 
-    testedText.add(recipe.name)
-    testedText.add(recipe.description)
-
-    recipe.ingredients.forEach((ingredient) => {
-      testedText.add(ingredient.name)
-    })
-
-    const keyWords = this.#extractKeyWords(testedText.value, false)
-    return keyWords.some(keyWord => expression.test(keyWord))
-  }
-
-  /*  Retourne les indexes des entités de recette contenant
-      l'ingrédient passé en paramètre. */
-  static #indexesByIngredient (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.ingredients.find((ingredient) => {
-        return ingredient.name === expression
-      })
-    }).map(recipe => recipe.id)
-  }
-
-  /*  Retourne les indexes des entités de recette contenant
-      l'appareil passé en paramètre. */
-  static #indexesByAppliance (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.appliance === expression
-    }).map(recipe => recipe.id)
-  }
-
-  /*  Retourne les indexes des entités de recette contenant
-      l'ustensile passé en paramètre. */
-  static #indexesByUstensil (expression) {
-    return this.#_entities.filter((recipe) => {
-      return recipe.ustensils.find((ustensil) => {
-        return ustensil === expression
-      })
-    }).map(recipe => recipe.id)
+    return returnedIndexes
   }
 }
 

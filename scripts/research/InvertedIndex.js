@@ -1,7 +1,5 @@
 class InvertedIndex {
-  // Constante pour la construction de l'indexe de mots clé.
   static #_wordBreaker = /[ ,’';:!?.()°%/\\0-9]+/ // Séparateur pour la découpe de phrease en mots.
-  static excludedWords = [] // Liste de mots non pertinants pour la recherche par mots clé.
 
   // Indexes inversés.
   static keyWordsMap = new Map() // Indexe inversé pour les mots clé.
@@ -10,7 +8,7 @@ class InvertedIndex {
   static ustensilsMap = new Map() // Indexe inversé pour les ustensiles.
 
   // Création des indexes inversés.
-  static updateMaps (hashTable) {
+  static updateMaps (hashTable, excludedWords = []) {
     // Réinitialiser les map.
     this.keyWordsMap.clear()
     this.ingredientsMap.clear()
@@ -26,32 +24,35 @@ class InvertedIndex {
     })
 
     // Supprimer les clés non pertinantes pour la recherche par mots clé.
-    this.excludedWords.forEach((excludedWord) => {
-      if (this.keyWordsMap.has(excludedWord)) {
-        this.keyWordsMap.delete(excludedWord)
-      }
+    excludedWords.forEach((excludedWord) => {
+      if (this.keyWordsMap.has(excludedWord)) this.keyWordsMap.delete(excludedWord)
     })
+
+    this.keyWordsMap.set('_allIndexes', Array.from(hashTable.keys()))
   }
 
   // Récupérer les mots clé dans les section 'name', 'description'
   // et 'ingredients[].name' d'une entité 'recipe'.
   static #scanKeyWords (recipe, id) {
-    const scanProperties = ['name', 'description']
+    const testedText = {
+      value: '',
+      add: function (text) {
+        text = text.toLowerCase()
+        this.value = this.value + text + ' '
+      }
+    }
 
-    scanProperties.forEach((property) => {
-      const words = recipe[property].split(this.#_wordBreaker)
-
-      words.forEach((word) => {
-        this.#updateKeyWord(word, id)
-      })
-    })
+    testedText.add(recipe.name)
+    testedText.add(recipe.description)
 
     recipe.ingredients.forEach((ingredient) => {
-      const words = ingredient.name.split(this.#_wordBreaker)
+      testedText.add(ingredient.name)
+    })
 
-      words.forEach((word) => {
-        this.#updateKeyWord(word, id)
-      })
+    const words = testedText.value.split(this.#_wordBreaker)
+
+    words.forEach((word) => {
+      this.#updateKeyWord(word, id)
     })
   }
 
@@ -59,8 +60,7 @@ class InvertedIndex {
   // ajouter l'indexe de la recette correspondante. S'il existe,
   // y ajouter l'indexe de la recette correspondante.
   static #updateKeyWord (word, id) {
-    if (word !== '' && word.length > 1) {
-      word = word.toLowerCase()
+    if (word.length > 1) {
       if (this.keyWordsMap.has(word)) {
         if (this.keyWordsMap.get(word).indexOf(id) === -1) {
           this.keyWordsMap.get(word).push(id)
