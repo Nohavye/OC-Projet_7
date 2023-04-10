@@ -33,9 +33,7 @@ class IndexesFinder {
 
     console.log(`
       Bilan de performance:
-
       Nombre de requètes: ${this.requestProcessingTimes.length}
-
       Temps de réponse:
       
         minimum: ${minTime} | maximum: ${maxTime}
