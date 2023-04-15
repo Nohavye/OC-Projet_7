@@ -12,7 +12,7 @@ Dans ce projet nous devons implémenter un moteur de recherche en adoptant deux 
 
 Le projet est donc divisé en plusieurs branches pour exposer les deux méthodes:
 
-  * arrayMethods: branche de l'option 1 (méthodes `array`)
-  * loopMethods: branche de l'option 2 (avec les boucles)
+  * [arrayMethods](https://github.com/Nohavye/OC-Projet_7/tree/arrayMethods): branche de l'option 1 (méthodes `array`)
+  * [loopMethods](https://github.com/Nohavye/OC-Projet_7/tree/loopMethods): branche de l'option 2 (avec les boucles)
 
-La branche principale `main` expose une solution alternative, elle utilise la technique des indexes inversés.
+La branche principale [main]https://github.com/Nohavye/OC-Projet_7/tree/main) expose une solution alternative, elle utilise la technique des indexes inversés.
