@@ -1,4 +1,4 @@
-import { DataManager as Manager, DataFormat } from './DataManger.js'
+import { DataManager as Manager, DataFormat } from './DataManager.js'
 
 const Data = {
   Manager,
