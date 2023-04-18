@@ -102,6 +102,10 @@ main {
   line-height: 22px;
 }
 
+.filterSelector_searchInput::placeholder {
+  color: white;
+}
+
 .filterSelector_list {
   font-weight: 400;
   font-size: 18px;
