@@ -111,3 +111,11 @@ main {
   font-size: 18px;
   line-height: 22px;
 }
+
+#message {
+  display: flex;
+  justify-content: center;
+  font-weight: 400;
+  font-size: 22px;
+  color: grey;
+}

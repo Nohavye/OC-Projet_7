@@ -103,6 +103,22 @@ function updateCardsCounter () {
   const nbCards = Globals.DOM.main.childElementCount
   components.cardsCounterText.textContent = nbCards > 1 ? `${nbCards} résultats` : `${nbCards} résultat`
   components.cardsCounterCross.style.display = components.searchInput.value.length > 0 ? 'block' : 'none'
+
+  if (nbCards === 0 && document.querySelector('#message').childElementCount === 0) {
+    document.querySelector('#message').appendChild(
+      createMessage('Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.')
+    )
+  }
+
+  if (nbCards !== 0 && document.querySelector('#message').childElementCount !== 0) {
+    document.querySelector('#message').innerHTML = ''
+  }
+}
+
+function createMessage (textContent) {
+  const message = document.createElement('p')
+  message.textContent = textContent
+  return message
 }
 
 // Initialisation des évènements.
